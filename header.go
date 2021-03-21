@@ -1,6 +1,7 @@
 package main
 
 type ResultCode int
+type QueryType int
 
 const (
 	NOERROR ResultCode = iota
@@ -9,9 +10,19 @@ const (
 	NXDOMAIN
 	NOTIMP
 	REFUSED
+
+	A QueryType = 1
 )
 
-func GetResultCode(val int) ResultCode {
+func GetQueryType(n int) QueryType {
+	if n == 1 {
+		return A
+	}
+
+	return QueryType(n)
+}
+
+func GetResultCode(val uint8) ResultCode {
 	switch val {
 	case 1:
 		return FORMERR
@@ -80,6 +91,41 @@ func (h *Header) Read(buf *Buffer) error {
 	a := uint8(flags >> 8)
 	b := uint8(flags & 0xFF)
 
-	// TODO: implement rest of the fields
+	h.RecursionDesired = (a & (1 << 0)) > 0
+	h.TruncatedMessage = (a & (1 << 1)) > 0
+	h.AuthoritativeAnswer = (a & (1 << 2)) > 0
+	h.Opcode = ((a >> 3) & 0x0F)
+	h.Response = (a & (1 << 7)) > 0
+
+	h.ResCode = GetResultCode(b & 0x0F)
+	h.CheckingDisabled = (b & (1 << 4)) > 0
+	h.AuthedData = (b & (1 << 5)) > 0
+	h.Z = (b & (1 << 6)) > 0
+	h.RecursionAvailable = (b & (1 << 7)) > 0
+
+	questions, err := buf.ReadUint16()
+	if err != nil {
+		return err
+	}
+	h.Questions = questions
+
+	answers, err := buf.ReadUint16()
+	if err != nil {
+		return err
+	}
+	h.Answers = answers
+
+	authEntries, err := buf.ReadUint16()
+	if err != nil {
+		return err
+	}
+	h.AuthoritativeEntries = authEntries
+
+	resourceEntries, err := buf.ReadUint16()
+	if err != nil {
+		return err
+	}
+	h.ResourceEntries = resourceEntries
+
 	return nil
 }
