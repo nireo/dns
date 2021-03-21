@@ -11,7 +11,8 @@ const (
 	NOTIMP
 	REFUSED
 
-	A QueryType = 1
+	A       QueryType = 1
+	UNKNOWN QueryType = 0
 )
 
 func GetQueryType(n int) QueryType {
@@ -19,7 +20,7 @@ func GetQueryType(n int) QueryType {
 		return A
 	}
 
-	return QueryType(n)
+	return UNKNOWN
 }
 
 func GetResultCode(val uint8) ResultCode {
