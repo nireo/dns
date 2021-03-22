@@ -54,7 +54,7 @@ func (c *Cache) Set(domain string, msg dnsmessage.Message) {
 	c.Lock()
 	c.domains[domain] = cacheEntry{
 		message:   msg,
-		ttl:       ttl,
+		ttl:       *ttl,
 		timestamp: time.Now().Unix(),
 	}
 	c.Unlock()
