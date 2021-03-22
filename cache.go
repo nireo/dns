@@ -20,7 +20,6 @@ type cacheEntry struct {
 
 // remember to initialize the cache
 var cache *Cache
-var ttl int64
 
 // Get finds a domain from the cache
 func (c *Cache) Get(domain string) (dnsmessage.Message, bool) {
