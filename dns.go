@@ -53,6 +53,7 @@ func ReadRecord(buf *Buffer) (*Record, error) {
 
 	switch qtype {
 	case A:
+		fmt.Println("found A type query")
 		addr, err := buf.ReadUint32()
 		if err != nil {
 			return nil, err
@@ -155,19 +156,9 @@ func main() {
 		log.Fatalf("erro reading packet: %s", err)
 	}
 
-	for _, q := range packet.Questions {
-		fmt.Printf("%v", q)
-	}
-
-	for _, r := range packet.Answers {
-		fmt.Printf("%v", r)
-	}
-
-	for _, r := range packet.Authorities {
-		fmt.Printf("%v", r)
-	}
-
-	for _, r := range packet.Resources {
-		fmt.Printf("%v", r)
-	}
+	fmt.Println(packet.Header)
+	fmt.Println(packet.Questions[0].Name)
+	fmt.Println(packet.Answers[0].Addr.String())
+	fmt.Println(len(packet.Authorities))
+	fmt.Println(len(packet.Resources))
 }
