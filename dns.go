@@ -150,7 +150,7 @@ func (s *Service) Forward(msg dnsmessage.Message) {
 		return
 	}
 
-	resolv := net.UDPAddr{IP: net.IP{114, 114, 114, 114}, Port: 53}
+	resolv := net.UDPAddr{IP: net.IP{8, 8, 8, 8}, Port: 53}
 	if _, err := s.conn.WriteToUDP(pack, &resolv); err != nil {
 		log.Printf("error responding to client: %s", err)
 	}
