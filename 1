@@ -81,7 +81,7 @@ func (pb *packetBuffer) readqname() (string, error) {
 	delim := ""
 	for {
 		if jumps_done > max_jumps {
-			return "", fmt.Errorf("Limit of %d jumps exceeded.", max_jumps)
+			return "", fmt.Errorf("Limit of {} jumps exceeded.", max_jumps)
 		}
 
 		len := pb.get(pos)

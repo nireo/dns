@@ -171,31 +171,35 @@ func (dr *DnsRecord) Fill(buffer *packetBuffer) {
 func (dp *DnsPacket) Fill(buffer *packetBuffer) {
 	dp.Header.Fill(buffer)
 
-	for i := uint16(0); i < dp.Header.Questions; i += 1 {
-		question := NewDnsQuestion("", UNKNOWN)
-		question.Fill(buffer)
+	// for i := uint16(0); i < dp.Header.Questions; i += 1 {
+	//	fmt.Println("reading question")
+	//	question := NewDnsQuestion("", UNKNOWN)
+	//	question.Fill(buffer)
 
-		dp.Questions = append(dp.Questions, question)
-	}
+	//	dp.Questions = append(dp.Questions, question)
+	// }
 
-	for i := uint16(0); i < dp.Header.Answers; i += 1 {
-		rec := NewDnsRecord()
-		rec.Fill(buffer)
+	// for i := uint16(0); i < dp.Header.Answers; i += 1 {
+	//	fmt.Println("reading answer")
+	//	rec := NewDnsRecord()
+	//	rec.Fill(buffer)
 
-		dp.Answers = append(dp.Answers, rec)
-	}
+	//	dp.Answers = append(dp.Answers, rec)
+	// }
 
-	for i := uint16(0); i < dp.Header.AuthoritativeEntries; i += 1 {
-		rec := NewDnsRecord()
-		rec.Fill(buffer)
+	// for i := uint16(0); i < dp.Header.AuthoritativeEntries; i += 1 {
+	//	fmt.Println("reading auth entry")
+	//	rec := NewDnsRecord()
+	//	rec.Fill(buffer)
 
-		dp.Answers = append(dp.Authorities, rec)
-	}
+	//	dp.Answers = append(dp.Authorities, rec)
+	// }
 
-	for i := uint16(0); i < dp.Header.ResourceEntries; i += 1 {
-		rec := NewDnsRecord()
-		rec.Fill(buffer)
+	// for i := uint16(0); i < dp.Header.ResourceEntries; i += 1 {
+	//	fmt.Println("reading resource")
+	//	rec := NewDnsRecord()
+	//	rec.Fill(buffer)
 
-		dp.Answers = append(dp.Resources, rec)
-	}
+	//	dp.Answers = append(dp.Resources, rec)
+	// }
 }
