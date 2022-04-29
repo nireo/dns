@@ -119,7 +119,3 @@ func (pb *packetBuffer) readqname() (string, error) {
 
 	return outStr, nil
 }
-
-func main() {
-	fmt.Println("hello dns")
-}
