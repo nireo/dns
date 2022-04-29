@@ -140,6 +140,37 @@ func (dh *DnsHeader) Fill(buffer *packetBuffer) {
 	dh.ResourceEntries = buffer.readu16()
 }
 
+func cbuint(val bool) uint8 {
+	if val {
+		return uint8(1)
+	}
+	return uint8(0)
+}
+
+func (dh *DnsHeader) Write(buffer *packetBuffer) {
+	buffer.writeu16(dh.ID)
+	buffer.writeu8(
+		cbuint(dh.RecursionDesired) |
+			(cbuint(dh.TruncatedMessage) << 1) |
+			(cbuint(dh.AuthoritativeAnswer) << 2) |
+			(dh.OpCode << 3) |
+			(cbuint(dh.Response) << 7),
+	)
+
+	buffer.writeu8(
+		uint8(dh.ResCode) |
+			(cbuint(dh.CheckingDisabled) << 4) |
+			(cbuint(dh.AuthedData) << 5) |
+			(cbuint(dh.Z) << 6) |
+			(cbuint(dh.RecursionAvailable) << 7),
+	)
+
+	buffer.writeu16(dh.Questions)
+	buffer.writeu16(dh.Answers)
+	buffer.writeu16(dh.AuthoritativeEntries)
+	buffer.writeu16(dh.ResourceEntries)
+}
+
 func (dr *DnsRecord) Fill(buffer *packetBuffer) {
 	var err error
 	dr.Domain, err = buffer.readqname()

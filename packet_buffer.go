@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
+	"strings"
 )
 
 type packetBuffer struct {
@@ -118,4 +119,45 @@ func (pb *packetBuffer) readqname() (string, error) {
 	}
 
 	return outStr, nil
+}
+
+func (pb *packetBuffer) write(val uint8) {
+	if pb.pos >= 512 {
+		panic("end of buffer")
+	}
+
+	pb.buffer[pb.pos] = val
+	pb.pos += 1
+}
+
+func (pb *packetBuffer) writeu8(val uint8) { // just to make code clearer
+	pb.write(val)
+}
+
+func (pb *packetBuffer) writeu16(val uint16) {
+	pb.write(uint8(val >> 8))
+	pb.write(uint8(val & 0xFF))
+}
+
+func (pb *packetBuffer) writeu32(val uint32) {
+	pb.write(uint8((val >> 24) & 0xFF))
+	pb.write(uint8((val >> 16) & 0xFF))
+	pb.write(uint8((val >> 8) & 0xFF))
+	pb.write(uint8((val >> 0) & 0xFF))
+}
+
+func (pb *packetBuffer) writeqname(qname string) error {
+	for _, s := range strings.Split(qname, ".") {
+		ln := len(s)
+		if ln > 0x3f {
+			return fmt.Errorf("single label exceeds 63 characters of length")
+		}
+
+		pb.writeu8(uint8(ln))
+		for _, b := range []byte(s) {
+			pb.writeu8(b)
+		}
+	}
+
+	return nil
 }
