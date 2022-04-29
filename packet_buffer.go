@@ -7,13 +7,13 @@ import (
 
 type packetBuffer struct {
 	buffer []byte
-	pos uint64
+	pos    uint64
 }
 
 func newPacketBuffer() *packetBuffer {
 	return &packetBuffer{
 		buffer: make([]byte, 1024),
-		pos: 0,
+		pos:    0,
 	}
 }
 
@@ -32,24 +32,24 @@ func (pb *packetBuffer) read() byte {
 		panic("end of buffer")
 	}
 	pb.pos += 1
-	return pb.buffer[pb.pos - 1]
+	return pb.buffer[pb.pos-1]
 }
 
-func (pb *packetBuffer) get() byte {
-	if pb.pos >= 1024 {
+func (pb *packetBuffer) get(pos uint64) byte {
+	if pos >= 1024 {
 		// we could return an error, but it is complicates codes and makes it less clean,
 		// because we need to handle the error.
 		panic("end of buffer")
 	}
-	return pb.buffer[pb.pos]
+	return pb.buffer[pos]
 }
 
 func (pb *packetBuffer) getRange(start, length uint64) []byte {
-	if start + length >= 1024 {
+	if start+length >= 1024 {
 		panic("end of buffer")
 	}
 
-	return pb.buffer[start:start + length]
+	return pb.buffer[start : start+length]
 }
 
 func (pb *packetBuffer) readu16() uint16 {
@@ -68,6 +68,56 @@ func (pb *packetBuffer) readu32() uint32 {
 	tempBuffer[3] = pb.read()
 
 	return binary.BigEndian.Uint32(tempBuffer)
+}
+
+func (pb *packetBuffer) readqname() (string, error) {
+	pos := pb.pos
+
+	jumped := false
+	max_jumps := 5
+	jumps_done := 0
+
+	outStr := ""
+	delim := ""
+	for {
+		if jumps_done > max_jumps {
+			return "", fmt.Errorf("Limit of {} jumps exceeded.", max_jumps)
+		}
+
+		len := pb.get(pos)
+		if (len & 0xC0) == 0xC0 {
+			if !jumped {
+				pb.seek(pos + 2)
+			}
+
+			byte2 := uint16(pb.get(pos + 1))
+			offset := ((uint16(len) ^ 0xC0) << 8) | byte2
+			pos = uint64(offset)
+
+			jumped = true
+			jumps_done += 1
+
+			continue
+		} else {
+			pos += 1
+			if len == 0 {
+				break
+			}
+
+			outStr += delim
+			strBuffer := pb.getRange(pos, uint64(len))
+			outStr += string(strBuffer)
+			delim = "."
+
+			pos += uint64(len)
+		}
+	}
+
+	if !jumped {
+		pb.seek(pos)
+	}
+
+	return outStr, nil
 }
 
 func main() {
